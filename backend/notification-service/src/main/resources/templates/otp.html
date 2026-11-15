@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Your OTP Code</title></head>
+<body>
+<h2>Hi <span th:text="${firstName}">there</span>,</h2>
+<p>Your one-time verification code is:</p>
+<h1 th:text="${otp}">000000</h1>
+<p>This code expires in 10 minutes. If you didn't request this, you can ignore this email.</p>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1500" viewBox="0 0 2200 1500">
+  <rect width="2200" height="1500" fill="#f8fafc"/>
+  <text x="1100" y="50" text-anchor="middle" font-family="Arial" font-size="34" font-weight="700" fill="#0f172a">E-Commerce Database Schema</text>
+  <text x="1100" y="82" text-anchor="middle" font-family="Arial" font-size="18" fill="#64748b">Generated from JPA entities</text>
+
+  <rect x="30" y="110" width="1460" height="1340" rx="18" fill="#eff6ff" stroke="#2563eb" stroke-width="3"/>
+  <rect x="1530" y="110" width="640" height="1340" rx="18" fill="#fff7ed" stroke="#ea580c" stroke-width="3"/>
+  <text x="760" y="150" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#1d4ed8">ecommerce_store database</text>
+  <text x="1850" y="150" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#c2410c">ecommerce_payment database</text>
+
+  <g font-family="Arial" font-size="15" fill="#0f172a">
+    <g transform="translate(60 190)">
+      <rect width="360" height="295" rx="8" fill="white" stroke="#334155"/>
+      <rect width="360" height="38" rx="8" fill="#2563eb"/>
+      <text x="180" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">users</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#b45309" font-weight="700">UQ</tspan> email VARCHAR</text>
+      <text x="20" y="124"><tspan fill="#b45309" font-weight="700">UQ</tspan> phone VARCHAR</text>
+      <text x="20" y="152">first_name VARCHAR</text>
+      <text x="20" y="180">last_name VARCHAR</text>
+      <text x="20" y="208">password VARCHAR</text>
+      <text x="20" y="236">google_id VARCHAR</text>
+      <text x="20" y="264">role VARCHAR</text>
+      <text x="20" y="288">enabled BOOLEAN</text>
+    </g>
+
+    <g transform="translate(465 190)">
+      <rect width="360" height="295" rx="8" fill="white" stroke="#334155"/>
+      <rect width="360" height="38" rx="8" fill="#2563eb"/>
+      <text x="180" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">refresh_tokens</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#b45309" font-weight="700">UQ</tspan> token VARCHAR</text>
+      <text x="20" y="124"><tspan fill="#dc2626" font-weight="700">FK</tspan> user_id BIGINT</text>
+      <text x="20" y="152">expires_at TIMESTAMP</text>
+      <text x="20" y="180">revoked BOOLEAN</text>
+    </g>
+
+    <g transform="translate(870 190)">
+      <rect width="390" height="295" rx="8" fill="white" stroke="#334155"/>
+      <rect width="390" height="38" rx="8" fill="#2563eb"/>
+      <text x="195" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">pending_registrations</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96">first_name VARCHAR</text>
+      <text x="20" y="124">last_name VARCHAR</text>
+      <text x="20" y="152">email VARCHAR</text>
+      <text x="20" y="180">phone VARCHAR</text>
+      <text x="20" y="208">password VARCHAR</text>
+      <text x="20" y="236">otp VARCHAR</text>
+      <text x="20" y="264">expires_at TIMESTAMP</text>
+      <text x="20" y="288">verified BOOLEAN</text>
+    </g>
+
+    <g transform="translate(1300 190)">
+      <rect width="160" height="295" rx="8" fill="white" stroke="#334155"/>
+      <rect width="160" height="38" rx="8" fill="#2563eb"/>
+      <text x="80" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">otp_tokens</text>
+      <text x="15" y="68"><tspan font-weight="700">PK</tspan> id</text>
+      <text x="15" y="96">phone</text>
+      <text x="15" y="124">otp</text>
+      <text x="15" y="152">expires_at</text>
+      <text x="15" y="180">verified</text>
+    </g>
+
+    <g transform="translate(60 530)">
+      <rect width="360" height="265" rx="8" fill="white" stroke="#334155"/>
+      <rect width="360" height="38" rx="8" fill="#2563eb"/>
+      <text x="180" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">addresses</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#dc2626" font-weight="700">FK</tspan> user_id BIGINT</text>
+      <text x="20" y="124">full_name VARCHAR</text>
+      <text x="20" y="152">phone VARCHAR</text>
+      <text x="20" y="180">house_number, street</text>
+      <text x="20" y="208">city, state, country</text>
+      <text x="20" y="236">zip_code VARCHAR</text>
+      <text x="20" y="260">default_address BOOLEAN</text>
+    </g>
+
+    <g transform="translate(465 530)">
+      <rect width="360" height="265" rx="8" fill="white" stroke="#334155"/>
+      <rect width="360" height="38" rx="8" fill="#2563eb"/>
+      <text x="180" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">carts</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#dc2626" font-weight="700">FK/UQ</tspan> user_id BIGINT</text>
+    </g>
+
+    <g transform="translate(870 530)">
+      <rect width="390" height="265" rx="8" fill="white" stroke="#334155"/>
+      <rect width="390" height="38" rx="8" fill="#2563eb"/>
+      <text x="195" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">cart_items</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#dc2626" font-weight="700">FK</tspan> cart_id BIGINT</text>
+      <text x="20" y="124"><tspan fill="#dc2626" font-weight="700">LK</tspan> product_id BIGINT</text>
+      <text x="20" y="152">quantity INTEGER</text>
+      <text x="20" y="180">unit_price DECIMAL(10,2)</text>
+    </g>
+
+    <g transform="translate(60 840)">
+      <rect width="360" height="255" rx="8" fill="white" stroke="#334155"/>
+      <rect width="360" height="38" rx="8" fill="#2563eb"/>
+      <text x="180" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">categories</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#b45309" font-weight="700">UQ</tspan> name VARCHAR</text>
+      <text x="20" y="124">description TEXT</text>
+      <text x="20" y="152">image_url VARCHAR</text>
+      <text x="20" y="180">active BOOLEAN</text>
+    </g>
+
+    <g transform="translate(465 840)">
+      <rect width="360" height="255" rx="8" fill="white" stroke="#334155"/>
+      <rect width="360" height="38" rx="8" fill="#2563eb"/>
+      <text x="180" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">subcategories</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#dc2626" font-weight="700">FK</tspan> category_id BIGINT</text>
+      <text x="20" y="124">name VARCHAR</text>
+      <text x="20" y="152">description TEXT</text>
+      <text x="20" y="180">active BOOLEAN</text>
+    </g>
+
+    <g transform="translate(870 840)">
+      <rect width="390" height="255" rx="8" fill="white" stroke="#334155"/>
+      <rect width="390" height="38" rx="8" fill="#2563eb"/>
+      <text x="195" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">products</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96">name, description</text>
+      <text x="20" y="124"><tspan fill="#b45309" font-weight="700">UQ</tspan> sku VARCHAR</text>
+      <text x="20" y="152">price, discount_price DECIMAL</text>
+      <text x="20" y="180">stock_quantity INTEGER</text>
+      <text x="20" y="208"><tspan fill="#dc2626" font-weight="700">LK</tspan> category_id BIGINT</text>
+      <text x="20" y="236"><tspan fill="#dc2626" font-weight="700">LK</tspan> subcategory_id BIGINT</text>
+      <text x="20" y="264">status VARCHAR</text>
+    </g>
+
+    <g transform="translate(60 1140)">
+      <rect width="360" height="270" rx="8" fill="white" stroke="#334155"/>
+      <rect width="360" height="38" rx="8" fill="#2563eb"/>
+      <text x="180" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">orders</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#b45309" font-weight="700">UQ</tspan> order_number VARCHAR</text>
+      <text x="20" y="124"><tspan fill="#dc2626" font-weight="700">LK</tspan> user_id BIGINT</text>
+      <text x="20" y="152"><tspan fill="#dc2626" font-weight="700">LK</tspan> address_id BIGINT</text>
+      <text x="20" y="180">total_amount DECIMAL</text>
+      <text x="20" y="208">payment_status VARCHAR</text>
+      <text x="20" y="236">order_status VARCHAR</text>
+      <text x="20" y="264">payment_id VARCHAR</text>
+    </g>
+
+    <g transform="translate(465 1140)">
+      <rect width="360" height="270" rx="8" fill="white" stroke="#334155"/>
+      <rect width="360" height="38" rx="8" fill="#2563eb"/>
+      <text x="180" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">order_items</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#dc2626" font-weight="700">FK</tspan> order_id BIGINT</text>
+      <text x="20" y="124"><tspan fill="#dc2626" font-weight="700">LK</tspan> product_id BIGINT</text>
+      <text x="20" y="152">product_name VARCHAR</text>
+      <text x="20" y="180">quantity INTEGER</text>
+      <text x="20" y="208">unit_price DECIMAL(10,2)</text>
+      <text x="20" y="236">total_price DECIMAL(10,2)</text>
+    </g>
+
+    <g transform="translate(870 1140)">
+      <rect width="390" height="270" rx="8" fill="white" stroke="#334155"/>
+      <rect width="390" height="38" rx="8" fill="#2563eb"/>
+      <text x="195" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">reviews</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#dc2626" font-weight="700">LK</tspan> user_id BIGINT</text>
+      <text x="20" y="124"><tspan fill="#dc2626" font-weight="700">LK</tspan> product_id BIGINT</text>
+      <text x="20" y="152">rating INTEGER</text>
+      <text x="20" y="180">comment TEXT</text>
+      <text x="20" y="208">user_name VARCHAR</text>
+      <text x="20" y="236"><tspan fill="#b45309" font-weight="700">UQ</tspan> user_id + product_id</text>
+    </g>
+
+    <g transform="translate(1560 190)">
+      <rect width="580" height="350" rx="8" fill="white" stroke="#334155"/>
+      <rect width="580" height="38" rx="8" fill="#ea580c"/>
+      <text x="290" y="26" text-anchor="middle" font-size="19" font-weight="700" fill="white">payments</text>
+      <text x="20" y="68"><tspan font-weight="700">PK</tspan> id BIGINT</text>
+      <text x="20" y="96"><tspan fill="#dc2626" font-weight="700">LK</tspan> order_id BIGINT</text>
+      <text x="20" y="124"><tspan fill="#dc2626" font-weight="700">LK</tspan> order_number VARCHAR</text>
+      <text x="20" y="152"><tspan fill="#dc2626" font-weight="700">LK</tspan> user_id BIGINT</text>
+      <text x="20" y="180">amount DECIMAL(10,2)</text>
+      <text x="20" y="208">currency VARCHAR</text>
+      <text x="20" y="236">status VARCHAR</text>
+      <text x="20" y="264">provider VARCHAR</text>
+      <text x="20" y="292">provider_payment_id VARCHAR</text>
+      <text x="20" y="320">provider_order_id VARCHAR</text>
+      <text x="20" y="348">failure_reason VARCHAR</text>
+    </g>
+  </g>
+
+  <g fill="none" stroke="#475569" stroke-width="2">
+    <path d="M420 314 H465"/>
+    <path d="M420 314 H420 V530 H465"/>
+    <path d="M645 530 V485 H645"/>
+    <path d="M825 662 H870"/>
+    <path d="M420 967 H465"/>
+    <path d="M420 1275 H465"/>
+    <path d="M420 1275 H420 V1140 H870"/>
+  </g>
+
+  <g stroke="#ea580c" stroke-width="2" stroke-dasharray="10 8" fill="none">
+    <path d="M1560 286 H1490"/>
+    <path d="M1490 286 V1275 H825"/>
+  </g>
+
+  <g font-family="Arial" font-size="15" fill="#334155">
+    <text x="1305" y="1430"><tspan fill="#dc2626" font-weight="700">FK</tspan> = database foreign key</text>
+    <text x="1500" y="1430"><tspan fill="#dc2626" font-weight="700">LK</tspan> = logical cross-service link</text>
+    <text x="1730" y="1430"><tspan fill="#b45309" font-weight="700">UQ</tspan> = unique constraint</text>
+    <text x="60" y="1430">PK = primary key | Created_at and updated_at audit fields are inherited from BaseEntity where applicable.</text>
+  </g>
+</svg>

@@ -1,0 +1,68 @@
+
+# ==============================
+# Node.js / React / Vite
+# ==============================
+node_modules/
+frontend/store-ui/node_modules/
+dist/
+build/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+backend/store-service/src/main/resources/service-account.json
+
+# ==============================
+# Java / Spring Boot / Maven
+# ==============================
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Gradle
+.gradle/
+build/
+
+# ==============================
+# IDE files
+# ==============================
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# ==============================
+# Logs
+# ==============================
+*.log
+logs/
+
+# ==============================
+# OS generated files
+# ==============================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==============================
+# Temporary files
+# ==============================
+*.tmp
+*.bak
+*.swp
+*.orig
+
+# ==============================
+# Test reports
+# ==============================
+coverage/
+.nyc_output/

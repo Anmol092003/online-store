@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Payment Failed</title></head>
+<body>
+<h2>Payment Failed</h2>
+<p>Your payment for order <strong th:text="${orderNumber}">ORD-XXX</strong> failed.</p>
+<p>Reason: <span th:text="${reason}">Unknown</span></p>
+<p>Please try again or contact support.</p>
+</body>
+</html>

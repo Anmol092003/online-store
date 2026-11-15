@@ -1,0 +1,432 @@
+# API Call Flow
+
+The frontend calls REST APIs through the API Gateway. The gateway routes requests to Store Service or Payment Service. Eureka provides service discovery. Kafka carries asynchronous events to Notification Service and back to Store Service.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    UI["React Frontend"]
+    GW["API Gateway - port 8080"]
+    Eureka["Eureka Service Discovery"]
+    Store["Store Service - port 8081"]
+    Payment["Payment Service - port 8082"]
+    Notification["Notification Service - port 8083"]
+    DB[("PostgreSQL")]
+    Kafka[("Apache Kafka")]
+    Razorpay["Razorpay Gateway"]
+
+    UI -->|"REST API plus JWT"| GW
+    GW --> Eureka
+    GW -->|"Store routes"| Store
+    GW -->|"Payment routes"| Payment
+    Store --> DB
+    Store -->|"otp-generated / order-created"| Kafka
+    Payment -->|"payment-success / payment-failed"| Kafka
+    Kafka --> Notification
+    Payment --> Razorpay
+```
+
+# 1. Signup Flow
+
+1. The user enters name, email or phone, password, and confirmation password in the React registration page.
+2. The frontend calls:
+
+   POST /api/auth/register/initiate
+
+3. The Axios client sends the request to /api.
+4. The API Gateway identifies the path as a public registration endpoint, so JWT is not required.
+5. The gateway routes the request to Store Service through Eureka.
+6. Store Service checks whether the email or phone already exists.
+7. Store Service creates a PendingRegistration and generates a six-digit OTP.
+8. The password and OTP are stored in encoded form with the pending registration.
+9. Store Service publishes an otp-generated event to Kafka.
+10. Notification Service consumes the otp-generated event.
+11. Notification Service sends the OTP by email or SMS.
+12. The frontend calls:
+
+    POST /api/auth/register/verify
+
+13. Store Service validates the OTP and expiry time.
+14. Store Service creates the real User record.
+15. Store Service generates an access token and refresh token.
+16. The frontend stores both tokens and the user in Redux/local storage.
+
+Example registration sequence:
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as React
+    participant G as API Gateway
+    participant S as Store Service
+    participant K as Kafka
+    participant N as Notification Service
+
+    U->>UI: Enter registration details
+    UI->>G: POST /api/auth/register/initiate
+    G->>S: Route public registration request
+    S->>S: Create pending registration and OTP
+    S->>K: Publish otp-generated
+    K->>N: Consume otp-generated
+    N->>U: Send OTP by email or SMS
+    UI->>G: POST /api/auth/register/verify
+    G->>S: Forward OTP and details
+    S->>S: Verify OTP and create user
+    S-->>UI: Access JWT + Refresh JWT + User
+    UI->>UI: Store tokens and user
+```
+
+# 2. Login Flow
+
+1. The user enters email or phone and password in LoginPage.
+2. The frontend calls:
+
+   POST /api/auth/login
+
+3. The API Gateway allows /api/auth/login because it is public.
+4. Store Service searches for the user by email or phone.
+5. Store Service verifies the password using Spring Security password matching.
+6. Store Service generates the JWT access token and refresh token.
+7. The frontend stores the tokens and user profile.
+
+Later protected requests contain:
+
+Authorization: Bearer <accessToken>
+
+The API Gateway validates the JWT and adds the following headers when forwarding the request:
+
+X-User-Id
+X-User-Role
+X-User-Email
+
+Example login sequence:
+
+```mermaid
+sequenceDiagram
+    participant UI as React
+    participant G as API Gateway
+    participant S as Store Service
+    participant DB as PostgreSQL
+
+    UI->>G: POST /api/auth/login
+    G->>S: Forward credentials
+    S->>DB: Find user by email or phone
+    DB-->>S: User record
+    S->>S: Verify password
+    S->>S: Generate access and refresh JWT
+    S-->>UI: AuthResponse
+    UI->>UI: Store tokens and navigate home
+```
+
+# 3. Cart and Checkout Flow
+
+Before checkout, the user can call these protected APIs:
+
+GET  /api/cart
+POST /api/cart/items
+PUT  /api/cart/items/{itemId}
+DELETE /api/cart/items/{itemId}
+GET  /api/addresses
+
+On the checkout page:
+
+1. Addresses are loaded from Store Service.
+2. Cart items are loaded from Redux.
+3. The user selects a delivery address.
+4. The user chooses COD or ONLINE payment.
+5. The frontend calls:
+
+   POST /api/orders
+
+Request body:
+
+{
+  "addressId": 123,
+  "paymentMethod": "ONLINE"
+}
+
+# 4. Order Placement Flow
+
+The API Gateway validates the JWT and forwards the request to Store Service.
+
+OrderService.placeOrder performs these operations:
+
+1. Reads the authenticated user's cart.
+2. Checks that the cart is not empty.
+3. Fetches every product referenced by the cart.
+4. Checks available stock.
+5. Reduces stock for each purchased product.
+6. Creates OrderItem records.
+7. Calculates the order total.
+8. Creates the order with payment status PENDING for online payment.
+9. Sets the order status to CONFIRMED for COD or PENDING for online payment.
+10. Saves the order.
+11. Clears the cart.
+12. Fetches the user.
+13. Publishes an order-created Kafka event.
+14. Returns the created order to the frontend.
+
+Store Service sends the following order event data:
+
+- orderId
+- orderNumber
+- userId
+- userEmail
+- totalAmount
+- createdAt
+- order items
+
+Notification Service consumes order-created and sends the order confirmation email.
+
+```mermaid
+sequenceDiagram
+    participant UI as React
+    participant G as API Gateway
+    participant S as Store Service
+    participant DB as PostgreSQL
+    participant K as Kafka
+    participant N as Notification Service
+
+    UI->>G: POST /api/orders
+    G->>S: Forward JWT and order request
+    S->>DB: Get cart, products and user
+    S->>S: Validate stock and calculate total
+    S->>DB: Reduce stock and save order
+    S->>DB: Clear cart
+    S->>K: Publish order-created
+    K->>N: Consume order-created
+    N->>N: Send order confirmation email
+    S-->>UI: Created order
+```
+
+# 5. COD Flow
+
+When paymentMethod is COD:
+
+1. Store Service creates the order.
+2. Order status is set to CONFIRMED.
+3. Cart is cleared.
+4. order-created is published to Kafka.
+5. Notification Service sends the confirmation email.
+6. The frontend navigates directly to the order detail page.
+
+The frontend does not call Payment Service for COD orders.
+
+# 6. Online Payment Flow
+
+After Store Service returns the created order, the frontend calls:
+
+POST /api/payments/initiate
+
+Example payload:
+
+{
+  "orderId": 45,
+  "orderNumber": "ORD-ABC12345",
+  "userId": 10,
+  "amount": 2500,
+  "currency": "INR"
+}
+
+The API Gateway routes /api/payments/** to Payment Service through Eureka.
+
+Payment Service performs these operations:
+
+1. Selects the configured payment gateway strategy.
+2. Calls Razorpay to create a provider payment order.
+3. Stores a Payment record with status INITIATED.
+4. Returns payment details:
+   - paymentId
+   - providerOrderId
+   - clientKey
+   - amount
+   - currency
+   - provider
+5. The frontend loads the Razorpay JavaScript SDK.
+6. Razorpay checkout opens with the provider order ID.
+7. The user completes or cancels payment.
+8. Razorpay returns payment ID, order ID, and signature.
+9. The frontend calls:
+
+   POST /api/payments/verify
+
+10. Payment Service verifies the provider response.
+11. If verification succeeds, payment status becomes CAPTURED.
+12. Payment Service publishes payment-success to Kafka.
+13. If verification fails, payment status becomes FAILED.
+14. Payment Service publishes payment-failed to Kafka.
+
+```mermaid
+sequenceDiagram
+    participant UI as React
+    participant G as API Gateway
+    participant S as Store Service
+    participant P as Payment Service
+    participant R as Razorpay
+    participant K as Kafka
+    participant N as Notification Service
+
+    UI->>G: POST /api/orders
+    G->>S: Create order
+    S-->>UI: Order and order ID
+
+    UI->>G: POST /api/payments/initiate
+    G->>P: Forward payment request
+    P->>R: Create provider payment order
+    R-->>P: Provider order ID
+    P->>P: Save payment as INITIATED
+    P-->>UI: Provider ID and Razorpay key
+
+    UI->>R: Open Razorpay checkout and pay
+    R-->>UI: Payment response with signature
+
+    UI->>G: POST /api/payments/verify
+    G->>P: Verify Razorpay response
+    P->>R: Verify payment signature
+    R-->>P: Verification result
+    P->>P: Update payment to CAPTURED or FAILED
+
+    alt Payment successful
+        P->>K: Publish payment-success
+    else Payment failed
+        P->>K: Publish payment-failed
+    end
+
+    K->>S: Store Service PaymentEventConsumer
+    K->>N: Notification Payment Consumer
+```
+
+# 7. Payment Event Processing
+
+Payment success:
+
+- Store Service PaymentEventConsumer reads payment-success.
+- Order paymentStatus is changed to PAID.
+- Order paymentId is saved.
+- Order status is changed to CONFIRMED.
+- Notification Service receives payment-success.
+- Current implementation logs the payment success.
+
+Payment failure:
+
+- Store Service PaymentEventConsumer reads payment-failed.
+- Order paymentStatus is changed to FAILED.
+- Order status is changed to CANCELLED.
+- Notification Service receives payment-failed.
+- Current implementation logs the failure.
+
+If the Razorpay script cannot load, the frontend cancels the order:
+
+POST /api/orders/{orderId}/cancel
+
+If the payment popup is cancelled or payment verification fails, the frontend also cancels the order.
+
+# 8. Complete Purchase Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as React
+    participant G as API Gateway
+    participant S as Store Service
+    participant P as Payment Service
+    participant K as Kafka
+    participant N as Notification Service
+    participant R as Razorpay
+
+    U->>UI: Signup
+    UI->>G: Registration APIs
+    G->>S: Create account
+    S->>K: otp-generated
+    K->>N: Send OTP
+
+    U->>UI: Login
+    UI->>G: POST /api/auth/login
+    G->>S: Validate credentials
+    S-->>UI: JWT access and refresh tokens
+
+    U->>UI: Add products and address
+    UI->>G: Protected cart/address APIs
+    G->>S: Execute operations
+
+    U->>UI: Place online order
+    UI->>G: POST /api/orders
+    G->>S: Create and store order
+    S->>S: Validate stock and clear cart
+    S->>K: order-created
+    K->>N: Send order confirmation
+
+    UI->>G: POST /api/payments/initiate
+    G->>P: Initiate provider payment
+    P->>R: Create payment order
+    P-->>UI: Provider payment details
+    UI->>R: Complete checkout
+    R-->>UI: Payment response
+
+    UI->>G: POST /api/payments/verify
+    G->>P: Verify payment
+    P->>K: payment-success or payment-failed
+    K->>S: Update order and payment status
+    K->>N: Process notification
+    UI->>U: Navigate to order details
+```
+
+# 9. Kafka Communication Summary
+
+Producer and consumer relationships:
+
+Store Service -> Kafka -> Notification Service
+- otp-generated
+- user-registered
+- order-created
+
+Payment Service -> Kafka -> Store Service
+- payment-success
+- payment-failed
+
+Payment Service -> Kafka -> Notification Service
+- payment-success
+- payment-failed
+
+Store Service -> Kafka -> Store Service
+- Store Service consumes payment-success and payment-failed.
+
+There is no direct synchronous HTTP call from Store Service or the frontend to Notification Service for signup or order events. Notification Service is driven by Kafka.
+
+There are no direct synchronous HTTP calls from Store Service to Payment Service. The frontend coordinates order creation and payment initiation through the API Gateway.
+
+# 10. Important API List
+
+Authentication APIs:
+
+POST /api/auth/register/initiate
+POST /api/auth/register/verify
+POST /api/auth/login
+POST /api/auth/refresh
+POST /api/auth/logout
+POST /api/auth/otp/send
+POST /api/auth/otp/verify
+POST /api/auth/google
+
+Cart APIs:
+
+GET    /api/cart
+POST   /api/cart/items
+PUT    /api/cart/items/{itemId}
+DELETE /api/cart/items/{itemId}
+DELETE /api/cart
+
+Order APIs:
+
+POST   /api/orders
+POST   /api/orders/{orderId}/cancel
+GET    /api/orders
+GET    /api/orders/{orderId}
+
+Payment APIs:
+
+POST /api/payments/initiate
+POST /api/payments/verify
+GET  /api/payments/history/{userId}
+GET  /api/payments/order/{orderId}
