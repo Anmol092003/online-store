@@ -1,0 +1,115 @@
+# =======================================================================
+# BazaarOne Root .gitignore
+# Covers Frontend (React/Vite), Backend (Spring Boot/Maven), and Python AI
+# =======================================================================
+
+# -----------------------------------------------------------------------
+# 1. Frontend / Node.js (UI)
+# -----------------------------------------------------------------------
+node_modules/
+**/node_modules/
+frontend/node_modules/
+
+# Production build outputs
+dist/
+**/dist/
+build/
+**/build/
+
+# Local env & npm debug logs
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -----------------------------------------------------------------------
+# 2. Backend / Java / Spring Boot / Maven
+# -----------------------------------------------------------------------
+target/
+**/target/
+*.class
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven specific
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Embedded Database / Storage files (H2, local db locks & trace)
+*.mv.db
+*.trace.db
+data/
+**/data/
+
+# Local uploaded media/assets (Cloudinary handles remote storage)
+uploads/
+**/uploads/
+
+# -----------------------------------------------------------------------
+# 3. Python Microservice (Chotu AI Chatbot / FastAPI)
+# -----------------------------------------------------------------------
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+**/venv/
+**/.venv/
+
+# Python test & coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Sensitive Environment Configurations & API Keys (keep out of git)
+.env
+backend/chotu-bhat-bat/.env
+*.env
+
+# -----------------------------------------------------------------------
+# 4. IDEs, Editors & Operating System Metadata
+# -----------------------------------------------------------------------
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# macOS / Windows system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log

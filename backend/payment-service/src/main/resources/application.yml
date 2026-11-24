@@ -1,0 +1,50 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: PAYMENT-SERVICE
+  datasource:
+    url: jdbc:h2:file:./data/bazaarpaymentdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: payment-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# ==============================================================================
+# RAZORPAY CREDENTIALS CONFIGURATION
+# Paste your Razorpay Key ID & Secret from Razorpay Dashboard -> Settings -> API Keys
+# ==============================================================================
+razorpay:
+  key-id: "${RAZORPAY_KEY_ID:rzp_test_YOUR_KEY_ID_HERE}"
+  key-secret: "${RAZORPAY_KEY_SECRET:YOUR_RAZORPAY_KEY_SECRET_HERE}"
+  currency: "INR"
+
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:true}
+    topics:
+      order-created: "bazaar.order.created"
+      payment-confirmed: "bazaar.payment.confirmed"
+
+main-service:
+  fallback-callback-url: "http://localhost:8081/api/orders/confirm-payment"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true

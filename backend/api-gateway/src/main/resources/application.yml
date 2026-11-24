@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders:
+              - "X-RateLimit-Remaining"
+              - "X-Idempotent-Replay"
+            allowCredentials: true
+      routes:
+        - id: main-service-api
+          uri: lb://MAIN-SERVICE
+          predicates:
+            - Path=/api/auth/**, /api/users/**, /api/catalog/**, /api/orders/**, /uploads/**
+        - id: payment-service-api
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/payments/**
+        - id: chotu-bot-api
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/chat/**, /api/insights/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
